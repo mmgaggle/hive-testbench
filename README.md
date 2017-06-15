@@ -3,6 +3,13 @@ hive-testbench
 
 A testbench for experimenting with Apache Hive at any data scale.
 
+Cloned from https://github.com/hortonworks/hive-testbench (TPC-H was also removed from framework as it was out of scope) and modified to allow new options for query engines and included format to be specified (orc/parquet)
+Additions to the following overview for Ceph Object Store Benchmark include:
+Wrappers scripts were added to run data generation and to run queries
+	tpcds-generate.sh - runs scale factor 1TB,10TB and 100TB for both orc and parquet formats (change directory and comment out tests appropriately before running)	
+	tpcds-run.sh - used to run queries for Presto,Spark,Hive and Hive on Spark for various scale factors by passing in directory including queries to run, directory also should contain control file telling the order to run the queries (for example to run UC11 - ./tpcds-run.sh UC11)
+        tpcds-concurrent-run.sh - same as tpcds-run.sh except also runs queries concurrently (for example to run UC11 with 4 concurrent threads -  ./tpcds-concurrent-run.sh UC11 4)
+
 Overview
 ========
 
@@ -28,12 +35,11 @@ All of these steps should be carried out on your Hadoop cluster.
 
 - Step 2: Decide which test suite(s) you want to use.
 
-  hive-testbench comes with data generators and sample queries based on both the TPC-DS and TPC-H benchmarks. You can choose to use either or both of these benchmarks for experiementation. More information about these benchmarks can be found at the Transaction Processing Council homepage.
+  hive-testbench comes with data generators and sample queries based on the TPC-DS benchmark. More information about these benchmarks can be found at the Transaction Processing Council homepage.
 
 - Step 3: Compile and package the appropriate data generator.
 
   For TPC-DS, ```./tpcds-build.sh``` downloads, compiles and packages the TPC-DS data generator.
-  For TPC-H, ```./tpch-build.sh``` downloads, compiles and packages the TPC-H data generator.
 
 - Step 4: Decide how much data you want to generate.
 
@@ -43,7 +49,7 @@ All of these steps should be carried out on your Hadoop cluster.
 
 - Step 5: Generate and load the data.
 
-  The scripts ```tpcds-setup.sh``` and ```tpch-setup.sh``` generate and load data for TPC-DS and TPC-H, respectively. General usage is ```tpcds-setup.sh scale_factor [directory]``` or ```tpch-setup.sh scale_factor [directory]```
+  The script ```tpcds-setup.sh``` generates and loads data for TPC-DS. General usage is ```tpcds-setup.sh scale_factor [directory]``` 
 
   Some examples:
 
@@ -61,7 +67,7 @@ All of these steps should be carried out on your Hadoop cluster.
 
 - Step 6: Run queries.
 
-  More than 50 sample TPC-DS queries and all TPC-H queries are included for you to try. You can use ```hive```, ```beeline``` or the SQL tool of your choice. The testbench also includes a set of suggested settings.
+  More than 50 sample TPC-DS queries are included for you to try. You can use ```hive```, ```beeline``` or the SQL tool of your choice. The testbench also includes a set of suggested settings.
 
   This example assumes you have generated 1 TB of TPC-DS data during Step 5:
 

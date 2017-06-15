@@ -1,0 +1,8 @@
+set spark.executor.memory=2048m;
+set spark.executor.instances=12;
+set spark.driver.memory=2048m;
+set spark.eventLog.enabled=false;
+set spark.serializer=org.apache.spark.serializer.KryoSerializer;
+set spark.kryo.classesToRegister=org.apache.hadoop.hive.ql.io.HiveKey,org.apache.hadoop.io.BytesWritable,org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
+set spark.driver.extraJavaOptions=-Xss8m;
+set spark.executor.extraJavaOptions=-Xss8m;

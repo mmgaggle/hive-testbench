@@ -1,0 +1,7 @@
+spark.executor.memory=54G
+spark.executor.instances=48
+spark.driver.memory=8G
+spark.executor.cores=23
+spark.driver.extraJavaOptions=-Xss8m
+spark.executor.extraJavaOptions=-Xss8m
+spark.hadoop.yarn.timeline-service.enabled=false
