@@ -56,10 +56,10 @@ if [ $SCALE -eq 1 ]; then
 	echo "Scale factor must be greater than 1"
 	exit 1
 fi
-if [ "$FORMAT" = "orc" ] || [ "$FORMAT" = "parquet" ] ; then
+if [ "$FORMAT" = "orc" ] || [ "$FORMAT" = "parquet" ] || [ "$FORMAT" = "text" ] ; then
 	echo "Format has been set to " $FORMAT
 else
-        echo "Format must be set to orc or parquet"
+        echo "Format must be set to text orc, or parquet"
         usage
 fi
 
@@ -77,47 +77,45 @@ if [ $? -ne 0 ]; then
 fi
 echo "TPC-DS text data generation complete."
 
-# Create the text/flat tables as external tables. These will be later be converted to ORCFile.
-echo "Loading text data into external tables."
-runcommand "hive -i settings/load-flat.sql -f ddl-tpcds/text/alltables.sql -d DB=tpcds_text_${SCALE} -d LOCATION=${DIR}/${SCALE}"
+if [ "${FORMAT}" == 'text' ];then
+  # Create the text/flat tables as external tables. These will be later be converted to ORCFile.
+  echo "Loading text data into external tables."
+  runcommand "hive -i settings/load-flat.sql -f ddl-tpcds/text/alltables.sql -d DB=tpcds_text_${SCALE} -d LOCATION=${DIR}/${SCALE}"
+else
+  # Create the partitioned and bucketed tables.
+  LOAD_FILE="load_${FORMAT}_${SCALE}.mk"
+  SILENCE="2> /dev/null 1> /dev/null"
 
-# Create the partitioned and bucketed tables.
+  if [ "X$DEBUG_SCRIPT" != "X" ]; then
+    SILENCE=""
+  fi
 
+  echo -e "all: ${DIMS} ${FACTS}" > $LOAD_FILE
+  i=1
+  total=24
+  DATABASE=tpcds_bin_partitioned_${FORMAT}_${SCALE}
 
-LOAD_FILE="load_${FORMAT}_${SCALE}.mk"
-SILENCE="2> /dev/null 1> /dev/null" 
-if [ "X$DEBUG_SCRIPT" != "X" ]; then
-	SILENCE=""
-fi
-
-echo -e "all: ${DIMS} ${FACTS}" > $LOAD_FILE
-
-i=1
-total=24
-DATABASE=tpcds_bin_partitioned_${FORMAT}_${SCALE}
-
-# Populate the smaller tables.
-for t in ${DIMS}
-do
-	COMMAND="hive -i settings/load-partitioned.sql -f ddl-tpcds/bin_partitioned/${t}.sql \
-	    -d DB=tpcds_bin_partitioned_${FORMAT}_${SCALE} -d SOURCE=tpcds_text_${SCALE} \
+  # Populate the smaller tables.
+  for t in ${DIMS}; do
+    COMMAND="hive -i settings/load-partitioned.sql -f ddl-tpcds/bin_partitioned/${t}.sql \
+            -d DB=tpcds_bin_partitioned_${FORMAT}_${SCALE} -d SOURCE=tpcds_text_${SCALE} \
             -d SCALE=${SCALE} \
 	    -d FILE=${FORMAT}"
-	echo -e "${t}:\n\t@$COMMAND $SILENCE && echo 'Optimizing table $t ($i/$total).'" >> $LOAD_FILE
-	i=`expr $i + 1`
-done
+    echo -e "${t}:\n\t@$COMMAND $SILENCE && echo 'Optimizing table $t ($i/$total).'" >> $LOAD_FILE
+    i=`expr $i + 1`
+  done
 
-for t in ${FACTS}
-do
-	COMMAND="hive -i settings/load-partitioned.sql -f ddl-tpcds/bin_partitioned/${t}.sql \
+  for t in ${FACTS}; do
+    COMMAND="hive -i settings/load-partitioned.sql -f ddl-tpcds/bin_partitioned/${t}.sql \
 	    -d DB=tpcds_bin_partitioned_${FORMAT}_${SCALE} \
             -d SCALE=${SCALE} \
 	    -d SOURCE=tpcds_text_${SCALE} -d BUCKETS=${BUCKETS} \
 	    -d RETURN_BUCKETS=${RETURN_BUCKETS} -d FILE=${FORMAT}"
-	echo -e "${t}:\n\t@$COMMAND $SILENCE && echo 'Optimizing table $t ($i/$total).'" >> $LOAD_FILE
-	i=`expr $i + 1`
-done
+    echo -e "${t}:\n\t@$COMMAND $SILENCE && echo 'Optimizing table $t ($i/$total).'" >> $LOAD_FILE
+    i=`expr $i + 1`
+  done
 
-make -j 1 -f $LOAD_FILE
+  make -j 1 -f $LOAD_FILE
 
-echo "Data loaded into database ${DATABASE}."
+  echo "Data loaded into database ${DATABASE}."
+fi
