@@ -7,7 +7,8 @@ echo "query_set,run_id,engine,format,scale_factor,query,status,start,end,tot_tim
 
 #run 1TB queries
 perl runSuite.pl $QUERY_DIR $run_id spark parquet 1000
-perl runSuite.pl $QUERY_DIR $run_id presto orc 1000
+perl runSuite.pl $QUERY_DIR $run_id presto orc 1000 localhost:8880
+perl runSuite.pl $QUERY_DIR $run_id impala parquet 1000 localhost:2100
 #perl runSuite.pl $QUERY_DIR $run_id hive orc 1000
 #perl runSuite.pl $QUERY_DIR $run_id hive-spark orc 1000
 
