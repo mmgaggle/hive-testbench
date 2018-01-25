@@ -38,11 +38,11 @@ for my $query ( @queries ) {
 	my $logname = "${engine}_${format}_${scale}_${query}_${run_id}";
 
         my $cmd = {
-                'hive' => "echo 'use $db; source $query;' | hive -i ../testbench.settings 2>&1  | tee $logname.log",
-                'hive-spark' => "echo 'use $db; source $query;' | hive -i ../testbench_hive-spark.settings 2>&1  | tee $logname.log",
-                'spark' => "spark-sql --master=yarn --database $db -f $query --properties-file ../testbench_spark.settings 2>&1 1>$logname.out | tee $logname.log",
+                'hive' => "echo 'use $db; source $query;' | hive -i ../settings/hive.sql 2>&1  | tee $logname.log",
+                'hive-spark' => "echo 'use $db; source $query;' | hive -i ../settings/hive-spark.sql 2>&1  | tee $logname.log",
+                'spark' => "spark-sql --master=yarn --database $db -f $query --properties-file ../settings/spark.conf 2>&1 1>$logname.out | tee $logname.log",
 	        'presto' => "presto --server $coordinator --catalog hive --schema $db --file $query 2>&1 1>$logname.out | tee $logname.log",
-                'impala' => "echo 'set mem_limit=107374182400;' && cat $query | impala-shell -i $coordinator -d $db -f -- 2>&1 | tee $logname.log",
+                'impala' => "cat ../settings/impala.sql $query | impala-shell -i $coordinator -d $db -f -- 2>&1 | tee $logname.log",
         };
 
 	my $hiveStart = time();
