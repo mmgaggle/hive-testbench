@@ -54,7 +54,8 @@ function etl {
                   -d DB=tpcds_bin_partitioned_${FORMAT}_${SCALE} \
                   -d SOURCE=tpcds_text_${SCALE} \
                   -d SCALE=${SCALE} \
-	          -d FILE=${FORMAT}"
+	          -d FILE=${FORMAT} \
+                  -d LOCATION=${LOCATION}"
     echo -e "${t}:\n\t@$COMMAND $SILENCE && echo 'Optimizing table $t ($i/$total).'" >> $LOAD_FILE
     i=`expr $i + 1`
   done
@@ -93,6 +94,7 @@ FACTS="store_sales store_returns web_sales web_returns catalog_sales catalog_ret
 SCALE=$1
 FORMAT=$2
 DIR=$3
+LOCATION=$4
 
 if [ "X$DEBUG_SCRIPT" != "X" ]; then
   set -x
