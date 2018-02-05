@@ -66,7 +66,8 @@ function etl {
 	          -d DB=tpcds_bin_partitioned_${FORMAT}_${SCALE} \
                   -d SCALE=${SCALE} \
 	          -d SOURCE=tpcds_text_${SCALE} \
-                  -d FILE=${FORMAT}"
+                  -d FILE=${FORMAT} \
+                  -d LOCATION=${LOCATION}"
     echo -e "${t}:\n\t@$COMMAND $SILENCE && echo 'Optimizing table $t ($i/$total).'" >> $LOAD_FILE
     i=`expr $i + 1`
   done
