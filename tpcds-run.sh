@@ -8,19 +8,25 @@ echo "query_set,run_id,engine,format,scale_factor,query,status,start,end,tot_tim
 #run 1TB queries
 perl runSuite.pl $QUERY_DIR $run_id spark parquet 1000
 perl runSuite.pl $QUERY_DIR $run_id presto orc 1000 localhost:8880
-perl runSuite.pl $QUERY_DIR $run_id impala parquet 1000 localhost:2100
+perl runSuite.pl $QUERY_DIR $run_id impala parquet 1000 localhost:21000
+#perl runSuite.pl $QUERY_DIR $run_id presto parquet 1000 localhost:8880
 #perl runSuite.pl $QUERY_DIR $run_id hive orc 1000
 #perl runSuite.pl $QUERY_DIR $run_id hive-spark orc 1000
 
 #run 10TB queries
 perl runSuite.pl $QUERY_DIR $run_id spark parquet 10000
 perl runSuite.pl $QUERY_DIR $run_id presto orc 10000
+#perl runSuite.pl $QUERY_DIR $run_id impala parquet 10000 localhost:21000
+#perl runSuite.pl $QUERY_DIR $run_id presto parquet 10000 localhost:8880
 #perl runSuite.pl $QUERY_DIR $run_id hive orc 10000
 #perl runSuite.pl $QUERY_DIR $run_id hive-spark orc 10000
 
 #run 100TB queries
 #perl runSuite.pl $QUERY_DIR $run_id presto orc 100000
 #perl runSuite.pl $QUERY_DIR $run_id spark parquet 100000
+#perl runSuite.pl $QUERY_DIR $run_id presto orc 100000
+#perl runSuite.pl $QUERY_DIR $run_id impala parquet 100000 localhost:21000
+#perl runSuite.pl $QUERY_DIR $run_id presto parquet 100000 localhost:8880
 #perl runSuite.pl $QUERY_DIR $run_id hive orc 100000
 #perl runSuite.pl $QUERY_DIR $run_id hive-spark orc 100000
 
