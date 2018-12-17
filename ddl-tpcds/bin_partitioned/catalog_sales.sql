@@ -79,4 +79,4 @@ select
         cs.cs_net_paid_inc_ship_tax,
         cs.cs_net_profit,
         cs.cs_sold_date_sk
-distribute by COALESCE(cs.cs_sold_date_sk, CAST(RAND() * 10 as INT)), CAST(RAND() * 10 as INT);
+distribute by COALESCE(cs.cs_sold_date_sk, CAST(RAND() * 1 as INT)), CAST(RAND() * 1 as INT);

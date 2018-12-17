@@ -65,4 +65,4 @@ select
         cr.cr_store_credit,
         cr.cr_net_loss,
         cr.cr_returned_date_sk
-distribute by COALESCE(cr.cr_returned_date_sk, CAST(RAND() * 10 as INT)), CAST(RAND() * 10 as INT);
+distribute by COALESCE(cr.cr_returned_date_sk, CAST(RAND() * 1 as INT)), CAST(RAND() * 1 as INT);

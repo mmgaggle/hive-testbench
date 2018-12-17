@@ -79,4 +79,4 @@ select
         ws.ws_net_paid_inc_ship_tax,
         ws.ws_net_profit,
         ws.ws_sold_date_sk
-distribute by COALESCE(ws.ws_sold_date_sk, CAST(RAND() * 10 as INT)), CAST(RAND() * 10 as INT);
+distribute by COALESCE(ws.ws_sold_date_sk, CAST(RAND() * 1 as INT)), CAST(RAND() * 1 as INT);

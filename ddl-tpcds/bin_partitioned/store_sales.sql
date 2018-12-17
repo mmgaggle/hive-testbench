@@ -58,5 +58,5 @@ select
         ss.ss_net_profit,
         ss.ss_sold_date_sk
 from ${SOURCE}.store_sales ss
-distribute by COALESCE(ss.ss_sold_date_sk, CAST(RAND() * 10 as INT)), CAST(RAND() * 10 as INT)
+distribute by COALESCE(ss.ss_sold_date_sk, CAST(RAND() * 1 as INT)), CAST(RAND() * 1 as INT)
 ;
