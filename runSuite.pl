@@ -38,11 +38,13 @@ for my $query ( @queries ) {
 	my $logname = "${engine}_${format}_${scale}_${query}_${run_id}";
 
         my $cmd = {
-                'hive' => "echo 'use $db; source $query;' | hive -i ../settings/hive.sql 2>&1  | tee $logname.log",
-                'hive-spark' => "echo 'use $db; source $query;' | hive -i ../settings/hive-spark.sql 2>&1  | tee $logname.log",
-                'spark' => "spark-sql --master=yarn --database $db -f $query --properties-file ../settings/spark.conf 2>&1 1>$logname.out | tee $logname.log",
-	        'presto' => "presto --server $coordinator --catalog hive --schema $db --file $query 2>&1 1>$logname.out | tee $logname.log",
-                'impala' => "cat ../settings/impala.sql $query | impala-shell -i $coordinator -d $db -f -- 2>&1 | tee $logname.log",
+                'hive' => "echo 'use $db; source $query;' | hive -i ../testbench.settings 2>&1  | tee $logname.log",
+                'hive-spark' => "echo 'use $db; source $query;' | hive -i ../testbench_hive-spark.settings 2>&1  | tee $logname.log",
+                'spark' => "spark-sql --master=yarn --database $db -f $query --properties-file ../testbench_spark.settings 2>&1 1>$logname.out | tee $logname.log",
+                #If using CDH, uncomment below and comment the line above
+                #'spark' => "spark2-submit --master yarn --properties-file ../testbench_spark.settings ../query-apps/" . $query . ".py 2>&1 | tee $logname.log",
+                'presto' => "presto --server $coordinator --catalog hive --schema $db --file $query 2>&1 1>$logname.out | tee $logname.log",
+                'impala' => "impala-shell -i $coordinator -d $db -f $query 2>&1 1>$logname.out | tee $logname.log"
         };
 
 	my $hiveStart = time();
@@ -54,24 +56,36 @@ for my $query ( @queries ) {
 	my $hiveEnd = time();
         my $hiveEndFmt = strftime('%Y-%m-%d %H:%M:%S',localtime($hiveEnd));
 	my $hiveTime = $hiveEnd - $hiveStart;
-        if ($engine eq 'hive' or $engine eq "hive-spark" or $engine eq "spark") {
+        if ($engine eq 'hive' or $engine eq "hive-spark") {
                 my $output = '';
 	        foreach my $line ( @hiveoutput ) {
 		        if( $line =~ /Time taken:\s+([\d\.]+)\s+seconds,\s+Fetched:*\s+(\d+)\s+row/ ) {
-			        $output = "$query_dir,$run_id,$engine,$format,$scale,$query,success,$hiveStartFmt,$hiveEndFmt,$hiveTime,$1,$2\n"; 
+			        $output = "$query_dir,$run_id,$engine,$format,$scale,$query,success,$hiveStartFmt,$hiveEndFmt,$hiveTime,$1,$2\n";
 		        } # end if
 	        } # end while
 	        if ( $output eq '' ) {
-		        $output = "$query_dir,$run_id,$engine,$format,$scale,$query,failed,$hiveStartFmt,$hiveEndFmt,$hiveTime,,\n"; 
+		        $output = "$query_dir,$run_id,$engine,$format,$scale,$query,failed,$hiveStartFmt,$hiveEndFmt,$hiveTime,,\n";
                 }
 	        print $fh $output;
-        } elsif ($engine eq 'impala' ) {
+        } elsif ($engine eq 'impala') {
                 my $output = '';
-	        foreach my $line ( @hiveoutput ) {
-		        if( $line =~ /Fetched (\d+) row\(s\) in (\d+).(\d+)s/) {
-			        $output = "$query_dir,$run_id,$engine,$format,$scale,$query,success,$hiveStartFmt,$hiveEndFmt,$hiveTime,$2.$3,$1\n"; 
-		        } # end if
-	        } # end while
+               foreach my $line ( @hiveoutput ) {
+                       if( $line =~ /Fetched (\d+) row\(s\) in (\d+).(\d+)s/) {
+				$output = "$query_dir,$run_id,$engine,$format,$scale,$query,success,$hiveStartFmt,$hiveEndFmt,$hiveTime,$2.$3,$1\n";
+                       } # end if
+               } # end while
+                if ( $output eq '' ) {
+                        $output = "$query_dir,$run_id,$engine,$format,$scale,$query,failed,$hiveStartFmt,$hiveEndFmt,$hiveTime,,\n";
+                }
+                print $fh $output;
+        } elsif ($engine eq 'spark') {
+               my $output = '';
+               #print @hiveoutput;
+               foreach my $line ( @hiveoutput ) {
+                       if( $line =~ /Fetched (\d+) row\(s\)/) {
+				$output = "$query_dir,$run_id,$engine,$format,$scale,$query,success,$hiveStartFmt,$hiveEndFmt,$hiveTime,,$1\n";
+                       } # end if
+               } # end while
                 if ( $output eq '' ) {
                         $output = "$query_dir,$run_id,$engine,$format,$scale,$query,failed,$hiveStartFmt,$hiveEndFmt,$hiveTime,,\n";
                 }
@@ -80,7 +94,7 @@ for my $query ( @queries ) {
                 my $rows = `wc -l $logname.out`;
                 my @row = split(/\s/, $rows);
                 if (not(@hiveoutput)) {
-                        print $fh "$query_dir,$run_id,$engine,$format,$scale,$query,success,$hiveStartFmt,$hiveEndFmt,$hiveTime,$hiveTime,$row[0]\n";
+                        print $fh "$query_dir,$run_id,$engine,$format,$scale,$query,success,$hiveStartFmt,$hiveEndFmt,$hiveTime,$hiveTime,$rows\n";
                 } else {
                         print $fh "$query_dir,$run_id,$engine,$format,$scale,$query,failed,$hiveStartFmt,$hiveEndFmt,$hiveTime,,\n";
                 }
@@ -98,11 +112,10 @@ sub dieWithUsage(;$) {
 
 	print STDERR <<USAGE;
 ${err}Usage:
-	perl ${SCRIPT_NAME} [query_dir] [hive|hive-spark|spark|presto] [orc|parquet] [scale] [coordinator]
+	perl ${SCRIPT_NAME} [query_dir] [hive|hive-spark|spark|presto|impala] [orc|parquet] [scale] [coordinator]
 
 Description:
 	This script runs the sample queries and outputs a CSV file of the time it took each query to run.  Also, all hive output is kept as a log file named '[hive|hive-spark|spark|presto|impala]_[orc|parquet]_[scale]_queryXX.sql.log' for each query file of the form 'queryXX.sql'. Defaults to scale of 2.
 USAGE
 	exit 1;
 }
-
