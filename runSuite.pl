@@ -40,7 +40,13 @@ for my $query ( @queries ) {
         my $cmd = {
                 'hive' => "echo 'use $db; source $query;' | hive -i ../settings/hive.sql 2>&1  | tee $logname.log",
                 'hive-spark' => "echo 'use $db; source $query;' | hive -i ../settings/hive-spark.sql 2>&1  | tee $logname.log",
-                'spark' => "spark-sql --master=yarn --database $db -f $query --properties-file ../settings/spark.conf 2>&1 1>$logname.out | tee $logname.log",
+                'spark' => "spark-submit \
+                              --master yarn \
+                              --deploy-mode cluster \
+                              --executor-memory 8G \
+                              --executor-cores 23 \
+                              --num-executors 48 \
+                              $query | tee $logname.log",
 	        'presto' => "presto --server $coordinator --catalog hive --schema $db --file $query 2>&1 1>$logname.out | tee $logname.log",
                 'impala' => "cat ../settings/impala.sql $query | impala-shell -i $coordinator -d $db -f -- 2>&1 | tee $logname.log",
         };
