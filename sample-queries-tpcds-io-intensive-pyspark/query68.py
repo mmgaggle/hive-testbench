@@ -1,5 +1,6 @@
 from pyspark.context import SparkContext
 from pyspark.sql import HiveContext
+sc = SparkContext(appName = "query68")
 sqlContext = HiveContext(sc)
 sqlContext.sql("use tpcds_bin_partitioned_parquet_1000")
 sqlContext.sql("""
