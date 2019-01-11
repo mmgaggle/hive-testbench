@@ -40,7 +40,7 @@ for my $query ( @queries ) {
         my $cmd = {
                 'hive' => "echo 'use $db; source $query;' | hive -i ../settings/hive.sql 2>&1  | tee $logname.log",
                 'hive-spark' => "echo 'use $db; source $query;' | hive -i ../settings/hive-spark.sql 2>&1  | tee $logname.log",
-                'spark' => "spark-submit --master yarn --deploy-mode cluster --executor-memory 8G --executor-cores 23 --num-executors 48 $query | tee $logname.log",
+                'spark' => "spark-submit --master yarn --deploy-mode cluster --executor-memory 8G --executor-cores 23 --num-executors 48 $query 2>&1 | tee $logname.log",
 	        'presto' => "presto --server $coordinator --catalog hive --schema $db --file $query 2>&1 1>$logname.out | tee $logname.log",
                 'impala' => "cat ../settings/impala.sql $query | impala-shell -i $coordinator -d $db -f -- 2>&1 | tee $logname.log",
         };
@@ -54,7 +54,7 @@ for my $query ( @queries ) {
 	my $hiveEnd = time();
         my $hiveEndFmt = strftime('%Y-%m-%d %H:%M:%S',localtime($hiveEnd));
 	my $hiveTime = $hiveEnd - $hiveStart;
-        if ($engine eq 'hive' or $engine eq "hive-spark" or $engine eq "spark") {
+        if ($engine eq 'hive' or $engine eq "hive-spark") {
                 my $output = '';
 	        foreach my $line ( @hiveoutput ) {
 		        if( $line =~ /Time taken:\s+([\d\.]+)\s+seconds,\s+Fetched:*\s+(\d+)\s+row/ ) {
@@ -65,6 +65,14 @@ for my $query ( @queries ) {
 		        $output = "$query_dir,$run_id,$engine,$format,$scale,$query,failed,$hiveStartFmt,$hiveEndFmt,$hiveTime,,\n"; 
                 }
 	        print $fh $output;
+        } elsif ($engine eq 'spark' ){
+			if ($line =~ /final status: SUCCEEDED/ ) {
+				$output = "$query_dir,$run_id,$engine,$format,$scale,$query,success,$hiveStartFmt,$hiveEndFmt,$hiveTime,na,na\n";
+                        }
+                        if ($line =~ /final status: FAILED/ ) {
+                                $output = "$query_dir,$run_id,$engine,$format,$scale,$query,failed,$hiveStartFmt,$hiveEndFmt,$hiveTime,,\n";
+                        }
+                }
         } elsif ($engine eq 'impala' ) {
                 my $output = '';
 	        foreach my $line ( @hiveoutput ) {
