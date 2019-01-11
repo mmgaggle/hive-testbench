@@ -66,6 +66,8 @@ for my $query ( @queries ) {
                 }
 	        print $fh $output;
         } elsif ($engine eq 'spark' ){
+                my $output = '';
+                foreach my $line (@hiveoutput ) {
 			if ($line =~ /final status: SUCCEEDED/ ) {
 				$output = "$query_dir,$run_id,$engine,$format,$scale,$query,success,$hiveStartFmt,$hiveEndFmt,$hiveTime,na,na\n";
                         }
