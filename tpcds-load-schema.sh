@@ -27,7 +27,7 @@ function compute_stats {
 
 function analyze_tables {
   hive -i settings/load-flat.sql \
-       -f ddl-tpcds/bin_partitioned/${i} \
+       -f ddl-tpcds/bin_partitioned/analyze.sql \
        -d DB=tpcds_bin_partitioned_parquet_1000 \
        -d LOCATION=s3a://tpc/parquet/1000 \
        -d FILE=parquet

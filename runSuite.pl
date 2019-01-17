@@ -74,6 +74,7 @@ for my $query ( @queries ) {
                         if ($line =~ /final status: FAILED/ ) {
                                 $output = "$query_dir,$run_id,$engine,$format,$scale,$query,failed,$hiveStartFmt,$hiveEndFmt,$hiveTime,,\n";
                         }
+	        print $fh $output;
                 }
         } elsif ($engine eq 'impala' ) {
                 my $output = '';

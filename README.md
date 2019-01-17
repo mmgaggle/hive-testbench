@@ -1,19 +1,17 @@
 hive-testbench
 ==============
 
-A testbench for experimenting with Apache Hive at any data scale.
+This repo contains a modified version of [hortonworks/hive-testbench](https://github.com/hortonworks/hive-testbench). Features included in this version include:
 
-Cloned from https://github.com/hortonworks/hive-testbench (TPC-H was also removed from framework as it was out of scope) and modified to allow new options for query engines and included format to be specified (orc/parquet)
-Additions to the following overview for Ceph Object Store Benchmark include:
-Wrappers scripts were added to run data generation and to run queries
-	tpcds-generate.sh - runs scale factor 1TB,10TB and 100TB for both orc and parquet formats (change directory and comment out tests appropriately before running)	
-	tpcds-run.sh - used to run queries for Presto,Spark,Hive and Hive on Spark for various scale factors by passing in directory including queries to run, directory also should contain control file telling the order to run the queries (for example to run UC11 - ./tpcds-run.sh UC11)
-        tpcds-concurrent-run.sh - same as tpcds-run.sh except also runs queries concurrently (for example to run UC11 with 4 concurrent threads -  ./tpcds-concurrent-run.sh UC11 4)
+ 1. Support for additional query engines: SparkSQL, Presto, Impala
+ 2. Support for columnar storage formats: Parquet, ORC
+ 3. Support for multiple concurrent users
+ 4. Support for external locations, useful for testing the S3A Filesystem Client
 
 Overview
 ========
 
-The hive-testbench is a data generator and set of queries that lets you experiment with Apache Hive at scale. The testbench allows you to experience base Hive performance on large datasets, and gives an easy way to see the impact of Hive tuning parameters and advanced settings.
+This hive-testbench is a data generator and set of queries that lets you experiment with various analytic tools at scale. The testbench allows you to experience base performance on large datasets, and gives an easy way to see the impact of tuning parameters and advanced settings.
 
 Prerequisites
 =============
