@@ -3,25 +3,6 @@
 STATS_ENGINE=$1
 COORDINATOR=$2
 
-# Sanity checking.
-if [ X"$STATS_ENGINE" = "X" ]; then
-  usage
-fi
-
-if [ $STATS_ENGINE -eq 'hive' ];then
-  load_tables
-  analyze_tables
-elif [ $STATS_ENGINE -eq 'impala' ];then
-  if [ X"$COORDINATOR" = "X" ]; then
-    usage
-    return
-  fi
-  load_tables
-  compute_stats
-else
-  usage
-fi
-
 function usage {
   echo "usage: tpcds-load-schema <STATS ENGINE> <COORDINATOR>"
   echo "valid values for STATS_ENGINE are 'hive' or 'impala'"
@@ -52,3 +33,21 @@ function analyze_tables {
        -d FILE=parquet
 }
 
+# Sanity checking.
+if [ X"$STATS_ENGINE" = "X" ]; then
+  usage
+fi
+
+if [ $STATS_ENGINE == 'hive' ];then
+  load_tables
+  analyze_tables
+elif [ $STATS_ENGINE == 'impala' ];then
+  if [ X"$COORDINATOR" = "X" ]; then
+    usage
+    return
+  fi
+  load_tables
+  compute_stats
+else
+  usage
+fi
