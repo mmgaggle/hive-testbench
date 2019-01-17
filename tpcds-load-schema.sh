@@ -15,7 +15,7 @@ function load_tables {
          -f ${table} \
          -d DB=tpcds_bin_partitioned_parquet_1000 \
          -d LOCATION=s3a://tpc/parquet/1000 \
-         -d FILE=parquet
+         -d FILE=PARQUET
   done
 }
 
@@ -30,7 +30,7 @@ function analyze_tables {
        -f ddl-tpcds/bin_partitioned/analyze.sql \
        -d DB=tpcds_bin_partitioned_parquet_1000 \
        -d LOCATION=s3a://tpc/parquet/1000 \
-       -d FILE=parquet
+       -d FILE=PARQUET
 }
 
 # Sanity checking.
