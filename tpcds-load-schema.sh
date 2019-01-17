@@ -20,7 +20,7 @@ function load_tables {
 }
 
 function compute_stats {
-  cat ../settings/impala.sql ddl-tpcds/bin_partitioned/compute.sql | impala-shell -i $coordinator 
+  cat settings/impala.sql ddl-tpcds/bin_partitioned/compute.sql | impala-shell -i $coordinator 
     -d tpcds_bin_partitioned_parquet_1000 \
     -f -- 2>&1
 }
