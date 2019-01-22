@@ -4,5 +4,5 @@ use ${DB};
 drop table if exists promotion;
 
 create table promotion
-stored as ${FILE}
+stored as ${FILE} TBLPROPERTIES ("${FILE}.compress"="${COMPRESSION}")
 as select * from ${SOURCE}.promotion;

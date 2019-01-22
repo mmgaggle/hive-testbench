@@ -26,7 +26,7 @@ create table store_returns
     sr_net_loss               double
 )
 partitioned by (sr_returned_date_sk bigint)
-stored as ${FILE};
+stored as ${FILE} TBLPROPERTIES ("${FILE}.compress"="${COMPRESSION}");
 
 from ${SOURCE}.store_returns sr
 insert overwrite table store_returns partition (sr_returned_date_sk) 
@@ -51,4 +51,4 @@ select
         sr.sr_store_credit,
         sr.sr_net_loss,
         sr.sr_returned_date_sk
-distribute by COALESCE(sr.sr_returned_date_sk, CAST(RAND() * 1 as INT)), CAST(RAND() * 1 as INT);
+distribute by COALESCE(sr.sr_returned_date_sk, CAST(RAND() * ${PART_FILES} as INT)), CAST(RAND() * ${PART_FILES} as INT);

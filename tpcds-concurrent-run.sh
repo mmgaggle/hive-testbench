@@ -2,6 +2,10 @@
 
 QUERY_DIR=$1
 CONCURRENCY=$2
+SCALE=$
+ENGINE=$3
+FORMAT=$4
+
 
 for x in `seq 1 $CONCURRENCY`
 do
@@ -9,11 +13,9 @@ do
 done
 
 
-#for scale in 1000 10000 100000 
 for scale in 1000 10000 
 do
-   #for engine_format in "presto orc" "spark parquet" "hive orc" "hive-spark orc" 
-   for engine_format in "spark parquet" "presto orc"   
+   for engine_format in "impala parquet" "presto orc"   
    do
       for x in `seq 1 $CONCURRENCY`
       do

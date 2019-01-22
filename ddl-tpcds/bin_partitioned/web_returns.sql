@@ -30,7 +30,7 @@ create table web_returns
     wr_net_loss               double
 )
 partitioned by (wr_returned_date_sk       bigint)
-stored as ${FILE};
+stored as ${FILE} TBLPROPERTIES ("${FILE}.compress"="${COMPRESSION}");
 
 from ${SOURCE}.web_returns wr
 insert overwrite table web_returns partition (wr_returned_date_sk)
@@ -59,4 +59,4 @@ select
         wr.wr_account_credit,
         wr.wr_net_loss,
 		wr.wr_returned_date_sk
-distribute by COALESCE(wr.wr_returned_date_sk, CAST(RAND() * 1 as INT)), CAST(RAND() * 1 as INT);
+distribute by COALESCE(wr.wr_returned_date_sk, CAST(RAND() * ${PART_FILES} as INT)), CAST(RAND() * ${PART_FILES} as INT);

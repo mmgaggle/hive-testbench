@@ -40,7 +40,7 @@ create table catalog_sales
     cs_net_profit             double
 )
 partitioned by (cs_sold_date_sk bigint)
-stored as ${FILE};
+stored as ${FILE} TBLPROPERTIES ("${FILE}.compress"="${COMPRESSION}");
 
 from ${SOURCE}.catalog_sales cs
 insert overwrite table catalog_sales partition (cs_sold_date_sk) 
@@ -79,4 +79,4 @@ select
         cs.cs_net_paid_inc_ship_tax,
         cs.cs_net_profit,
         cs.cs_sold_date_sk
-distribute by COALESCE(cs.cs_sold_date_sk, CAST(RAND() * 1 as INT)), CAST(RAND() * 1 as INT);
+distribute by COALESCE(cs.cs_sold_date_sk, CAST(RAND() * ${PART_FILES} as INT)), CAST(RAND() * ${PART_FILES} as INT);

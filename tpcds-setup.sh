@@ -1,7 +1,9 @@
 #!/bin/bash
 
 function usage {
-  echo "Usage: tpcds-setup.sh scale_factor format [temp_directory]"
+  echo "Usage: "
+  echo "       tpcds-setup.sh <scale factor> text <target>"
+  echo "       tpcds-setup.sh <scale factor> [ parquet | orc ] <text location> <target location> ... [ snappy | zlib | none ] <files per partition>"
   exit 1
 }
 
@@ -19,7 +21,7 @@ function generate {
     echo "Generating data at scale factor $SCALE."
     (cd tpcds-gen; hadoop jar target/*.jar -d ${DIR}/${SCALE}/ -s ${SCALE})
   fi
-  hdfs dfs -ls ${DIR}/${SCALE} > /dev/null
+  hdfs dfs -ls ${DIR}/text/${SCALE} > /dev/null
   if [ $? -ne 0 ]; then
     echo "Data generation failed, exiting."
     exit 1
@@ -28,13 +30,11 @@ function generate {
 }
 
 function etl {
-  # Create the text/flat tables as external tables. These will be later be converted to ORCFile.
+  # Create the text/flat tables as external tables. These will be later be converted to a columnar format
   echo "Loading text data into external tables."
   runcommand "hive -i settings/load-flat.sql -f ddl-tpcds/text/alltables.sql -d DB=tpcds_text_${SCALE} -d LOCATION=${DIR}/${SCALE}"
 
   # Create the partitioned and bucketed tables.
-
-
   LOAD_FILE="load_${FORMAT}_${SCALE}.mk"
   SILENCE="2> /dev/null 1> /dev/null" 
   if [ "X$DEBUG_SCRIPT" != "X" ]; then
@@ -45,7 +45,7 @@ function etl {
 
   i=1
   total=24
-  DATABASE=tpcds_bin_partitioned_${FORMAT}_${SCALE}
+  DATABASE=tpcds_bin_partitioned_${FORMAT}_${SCALE}_${COMPRESSION}_${PART_FILES}
 
   # Populate the smaller tables.
   for t in ${DIMS}; do
@@ -55,7 +55,8 @@ function etl {
                   -d SOURCE=tpcds_text_${SCALE} \
                   -d SCALE=${SCALE} \
 	          -d FILE=${FORMAT} \
-                  -d LOCATION=${LOCATION}"
+                  -d LOCATION=${LOCATION} \
+                  -d COMPRESSION=${COMPRESSION}"
     echo -e "${t}:\n\t@$COMMAND $SILENCE && echo 'Optimizing table $t ($i/$total).'" >> $LOAD_FILE
     i=`expr $i + 1`
   done
@@ -67,7 +68,9 @@ function etl {
                   -d SCALE=${SCALE} \
 	          -d SOURCE=tpcds_text_${SCALE} \
                   -d FILE=${FORMAT} \
-                  -d LOCATION=${LOCATION}"
+                  -d LOCATION=${LOCATION} \
+                  -d COMPRESSION=${COMPRESSION} \
+                  -d FILES=${PART_FILES} "
     echo -e "${t}:\n\t@$COMMAND $SILENCE && echo 'Optimizing table $t ($i/$total).'" >> $LOAD_FILE
     i=`expr $i + 1`
   done
@@ -96,6 +99,8 @@ SCALE=$1
 FORMAT=$2
 DIR=$3
 LOCATION=$4
+COMPRESSION=${5:-snappy}
+PART_FILES=${6:-1}
 
 if [ "X$DEBUG_SCRIPT" != "X" ]; then
   set -x
@@ -119,7 +124,12 @@ fi
 if [ "$FORMAT" = "text" ];then
   generate
 elif [ "$FORMAT" = "orc" ] || [ "$FORMAT" = "parquet" ];then
-  etl
+  if [ "$COMPRESSION" = "snappy" ] || [ "$COMPRESSION" = "zlib" ] || [ "$COMPRESSION" = "none" ];then
+    etl
+  else
+    echo "Compression must be set to [snappy|gzip|none]"
+    usage
+  fi
 else
   echo "Format must be set to [text|orc|parquet]"
   usage

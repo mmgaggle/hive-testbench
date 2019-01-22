@@ -40,7 +40,7 @@ create table web_sales
     ws_net_profit             double
 )
 partitioned by (ws_sold_date_sk           bigint)
-stored as ${FILE};
+stored as ${FILE} TBLPROPERTIES ("${FILE}.compress"="${COMPRESSION}");
 
 from ${SOURCE}.web_sales ws
 insert overwrite table web_sales partition (ws_sold_date_sk) 
@@ -79,4 +79,4 @@ select
         ws.ws_net_paid_inc_ship_tax,
         ws.ws_net_profit,
         ws.ws_sold_date_sk
-distribute by COALESCE(ws.ws_sold_date_sk, CAST(RAND() * 1 as INT)), CAST(RAND() * 1 as INT);
+distribute by COALESCE(ws.ws_sold_date_sk, CAST(RAND() * ${PART_FILES} as INT)), CAST(RAND() * ${PART_FILES} as INT);

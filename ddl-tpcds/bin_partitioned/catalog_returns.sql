@@ -33,7 +33,7 @@ create table catalog_returns
     cr_net_loss               double
 )
 partitioned by (cr_returned_date_sk bigint)
-stored as ${FILE};
+stored as ${FILE} TBLPROPERTIES ("${FILE}.compress"="${COMPRESSION}");
 
 from ${SOURCE}.catalog_returns cr
 insert overwrite table catalog_returns partition(cr_returned_date_sk) 
@@ -65,4 +65,4 @@ select
         cr.cr_store_credit,
         cr.cr_net_loss,
         cr.cr_returned_date_sk
-distribute by COALESCE(cr.cr_returned_date_sk, CAST(RAND() * 1 as INT)), CAST(RAND() * 1 as INT);
+distribute by COALESCE(cr.cr_returned_date_sk, CAST(RAND() * ${PART_FILES} as INT)), CAST(RAND() * ${PART_FILES} as INT);

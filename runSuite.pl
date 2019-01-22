@@ -20,9 +20,11 @@ my $run_id = shift;
 my $engine = shift;
 my $format = shift;
 my $scale = shift || 2;
+my $compression = shift || 'snappy';
+my $part_files = shift || 1;
 my $coordinator = shift || "localhost:8880";
-dieWithUsage("suite name required") unless $engine eq "hive" or $engine eq "hive-spark" or $engine eq "spark" or $engine eq "presto" or $engine eq "impala";
-dieWithUsage("suite name required") unless $format eq "orc" or $format eq "parquet";
+dieWithUsage("engine required") unless $engine eq "hive" or $engine eq "hive-spark" or $engine eq "spark" or $engine eq "presto" or $engine eq "impala";
+dieWithUsage("format required") unless $format eq "orc" or $format eq "parquet";
 
 chdir $SCRIPT_PATH;
 chdir $query_dir;
@@ -33,7 +35,7 @@ open(my $fh, '>>', $filename) or die "Could not open file '$filename' $!";
 #my @queries = glob '*.sql';
 my @queries = split(/\s/, `cat run_order_${run_id}.txt`);
 
-my $db = "tpcds_bin_partitioned_${format}_$scale";
+my $db = "tpcds_bin_partitioned_${format}_${scale}_${compression}_${part_files}";
 for my $query ( @queries ) {
 	my $logname = "${engine}_${format}_${scale}_${query}_${run_id}";
 

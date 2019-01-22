@@ -29,7 +29,7 @@ create table store_sales
     ss_net_profit             double
 )
 partitioned by (ss_sold_date_sk bigint)
-stored as ${FILE};
+stored as ${FILE} TBLPROPERTIES ("${FILE}.compress"="${COMPRESSION}");
 
 
 insert overwrite table store_sales partition (ss_sold_date_sk) 
@@ -58,5 +58,5 @@ select
         ss.ss_net_profit,
         ss.ss_sold_date_sk
 from ${SOURCE}.store_sales ss
-distribute by COALESCE(ss.ss_sold_date_sk, CAST(RAND() * 1 as INT)), CAST(RAND() * 1 as INT)
+distribute by COALESCE(ss.ss_sold_date_sk, CAST(RAND() * ${PART_FILES} as INT)), CAST(RAND() * ${PART_FILES} as INT)
 ;

@@ -2,26 +2,20 @@
 
 QUERY_DIR=$1
 run_id=0
+COORDINATOR="<INSERT COORDINATOR"
 
 echo "query_set,run_id,engine,format,scale_factor,query,status,start,end,tot_time,query_time,rows" > $1/tpc_stats_${run_id}.log
 
-#run 1TB queries
-perl runSuite.pl $QUERY_DIR $run_id spark parquet 1000
-perl runSuite.pl $QUERY_DIR $run_id presto orc 1000 localhost:8880
-perl runSuite.pl $QUERY_DIR $run_id impala parquet 1000 localhost:2100
-#perl runSuite.pl $QUERY_DIR $run_id hive orc 1000
-#perl runSuite.pl $QUERY_DIR $run_id hive-spark orc 1000
+# done
+perl runSuite.pl $QUERY_DIR $run_id spark parquet 1000 snappy 1
+perl runSuite.pl $QUERY_DIR $run_id impala parquet 1000 snappy 1 ${COORDINATOR}
 
-#run 10TB queries
-perl runSuite.pl $QUERY_DIR $run_id spark parquet 10000
-perl runSuite.pl $QUERY_DIR $run_id presto orc 10000
-#perl runSuite.pl $QUERY_DIR $run_id hive orc 10000
-#perl runSuite.pl $QUERY_DIR $run_id hive-spark orc 10000
-
-#run 100TB queries
-#perl runSuite.pl $QUERY_DIR $run_id presto orc 100000
-#perl runSuite.pl $QUERY_DIR $run_id spark parquet 100000
-#perl runSuite.pl $QUERY_DIR $run_id hive orc 100000
-#perl runSuite.pl $QUERY_DIR $run_id hive-spark orc 100000
+# todo
+perl runSuite.pl $QUERY_DIR $run_id spark parquet 1000 snappy 10
+perl runSuite.pl $QUERY_DIR $run_id impala parquet 1000 snappy 10 ${COORDINATOR}
+perl runSuite.pl $QUERY_DIR $run_id spark parquet 1000 none 1
+perl runSuite.pl $QUERY_DIR $run_id spark parquet 1000 none 10
+perl runSuite.pl $QUERY_DIR $run_id impala parquet 1000 none 1 ${COORDINATOR}
+perl runSuite.pl $QUERY_DIR $run_id impala parquet 1000 none 10 ${COORDINATOR}
 
 cp $1/tpc_stats_${run_id}.log $1/tpc_stats_${run_id}.log.`date "+%F-%T"`

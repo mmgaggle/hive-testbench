@@ -10,7 +10,7 @@ create table inventory
     inv_quantity_on_hand	int
 )
 partitioned by (inv_date_sk bigint)
-stored as ${FILE};
+stored as ${FILE} TBLPROPERTIES ("${FILE}.compress"="${COMPRESSION}");
 
 insert overwrite table inventory partition (inv_date_sk)
 select

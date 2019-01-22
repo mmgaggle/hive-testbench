@@ -4,5 +4,5 @@ use ${DB};
 drop table if exists catalog_page;
 
 create table catalog_page
-stored as ${FILE}
+stored as ${FILE} TBLPROPERTIES ("${FILE}.compress"="${COMPRESSION}")
 as select * from ${SOURCE}.catalog_page;
