@@ -93,6 +93,7 @@ create external table catalog_returns
 )
 stored as ${FILE} 
 location '${LOCATION}/catalog_returns';
+msck repair table catalog_returns;
 create database if not exists ${DB};
 use ${DB};
 
@@ -137,6 +138,7 @@ create external table catalog_sales
 )
 stored as ${FILE} 
 location '${LOCATION}/catalog_sales';
+msck repair table catalog_sales;
 create database if not exists ${DB};
 use ${DB};
 
@@ -404,6 +406,7 @@ create external table store_returns
 )
 stored as ${FILE} 
 location '${LOCATION}/store_returns';
+msck repair table store_returns;
 create database if not exists ${DB};
 use ${DB};
 
@@ -437,6 +440,7 @@ create external table store_sales
 )
 stored as ${FILE} 
 location '${LOCATION}/store_sales';
+msck repair table store_sales;
 create database if not exists ${DB};
 use ${DB};
 
@@ -576,6 +580,7 @@ create external table web_returns
 )
 stored as ${FILE} 
 location '${LOCATION}/web_returns';
+msck repair table web_returns;
 create database if not exists ${DB};
 use ${DB};
 
@@ -620,6 +625,7 @@ create external table web_sales
 )
 stored as ${FILE} 
 location '${LOCATION}/web_sales';
+msck repair table web_sales;
 create database if not exists ${DB};
 use ${DB};
 
