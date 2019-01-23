@@ -11,7 +11,7 @@ function usage {
 
 function load_tables {
   hive -i settings/load-flat.sql \
-       -f ddl-tpcds/create_externals.sql
+       -f ddl-tpcds/create_externals.sql \
        -d DB=tpcds_bin_partitioned_parquet_1000 \
        -d LOCATION=s3a://tpc/parquet/1000 \
        -d FILE=PARQUET
