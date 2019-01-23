@@ -11,9 +11,8 @@ function usage {
 
 function load_tables {
   for table in ddl-tpcds/bin_partition_create_only/* ;do
-    echo "loading ${table}"
     hive -i settings/load-flat.sql \
-         -f ddl-tpcds/bin_partition_create_only/${table}.sql \
+         -f ${table} \
          -d DB=tpcds_bin_partitioned_parquet_1000 \
          -d LOCATION=s3a://tpc/parquet/1000 \
          -d FILE=PARQUET
