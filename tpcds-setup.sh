@@ -48,29 +48,29 @@ function etl {
   DATABASE=tpcds_bin_partitioned_${FORMAT}_${SCALE}_${COMPRESSION}_${PART_FILES}
 
   # Populate the smaller tables.
-  for t in ${DIMS}; do
-    COMMAND="hive -i settings/load-partitioned.sql \
-                  -f ddl-tpcds/bin_partitioned/${t}.sql \
-                  -d DB=tpcds_bin_partitioned_${FORMAT}_${SCALE} \
-                  -d SOURCE=tpcds_text_${SCALE} \
-                  -d SCALE=${SCALE} \
-	          -d FILE=${FORMAT} \
-                  -d LOCATION=${LOCATION} \
-                  -d COMPRESSION=${COMPRESSION}"
-    echo -e "${t}:\n\t@$COMMAND $SILENCE && echo 'Optimizing table $t ($i/$total).'" >> $LOAD_FILE
-    i=`expr $i + 1`
-  done
-
+#  for t in ${DIMS}; do
+#    COMMAND="hive -i settings/load-partitioned.sql \
+#                  -f ddl-tpcds/bin_partitioned/${t}.sql \
+#                  -d DB=tpcds_bin_partitioned_${FORMAT}_${SCALE}_${COMPRESSION}_${PART_FILES} \
+#                  -d SOURCE=tpcds_text_${SCALE} \
+#                  -d SCALE=${SCALE} \
+#	          -d FILE=${FORMAT} \
+#                  -d LOCATION=${LOCATION} \
+#                  -d COMPRESSION=${COMPRESSION} \
+#	 	  -d FILES=${PART_FILES} "
+#    echo -e "${t}:\n\t@$COMMAND $SILENCE && echo 'Optimizing table $t ($i/$total).'" >> $LOAD_FILE
+#    i=`expr $i + 1`
+#  done
   for t in ${FACTS}; do
     COMMAND="hive -i settings/load-partitioned.sql \
                   -f ddl-tpcds/bin_partitioned/${t}.sql \
-	          -d DB=tpcds_bin_partitioned_${FORMAT}_${SCALE} \
+	          -d DB=tpcds_bin_partitioned_${FORMAT}_${SCALE}_${COMPRESSION}_${PART_FILES} \
                   -d SCALE=${SCALE} \
 	          -d SOURCE=tpcds_text_${SCALE} \
                   -d FILE=${FORMAT} \
                   -d LOCATION=${LOCATION} \
                   -d COMPRESSION=${COMPRESSION} \
-                  -d FILES=${PART_FILES} "
+                  -d PART_FILES=${PART_FILES} "
     echo -e "${t}:\n\t@$COMMAND $SILENCE && echo 'Optimizing table $t ($i/$total).'" >> $LOAD_FILE
     i=`expr $i + 1`
   done
@@ -91,8 +91,10 @@ if [ $? -ne 0 ]; then
 fi
 
 # Tables in the TPC-DS schema.
-DIMS="date_dim time_dim item customer customer_demographics household_demographics customer_address store promotion warehouse ship_mode reason income_band call_center web_page catalog_page web_site"
-FACTS="store_sales store_returns web_sales web_returns catalog_sales catalog_returns inventory"
+#DIMS="date_dim time_dim item customer customer_demographics household_demographics customer_address store promotion warehouse ship_mode reason income_band call_center web_page catalog_page web_site"
+DIMS=""
+#FACTS="store_sales store_returns web_sales web_returns catalog_sales catalog_returns inventory"
+FACTS="store_sales web_sales web_returns catalog_sales catalog_returns inventory"
 
 # Get the parameters.
 SCALE=$1
